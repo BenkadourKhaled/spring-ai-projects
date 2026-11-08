@@ -15,4 +15,5 @@ spring:
 
 logging:
   level:
-    org.springframework.ai.chat.client.advisor: DEBUG
+    org.springframework.ai: DEBUG
+    org.springframework.boot.autoconfigure: DEBUG   # détail des conditions d'auto-configuration

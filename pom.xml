@@ -23,7 +23,7 @@
     </properties>
 
     <modules>
-        <module>exercise1.1</module>
+        <module>series-01</module>
     </modules>
 
     <dependencyManagement>

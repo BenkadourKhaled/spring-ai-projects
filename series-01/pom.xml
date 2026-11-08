@@ -9,7 +9,7 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>1</artifactId>
+    <artifactId>series-01</artifactId>
     <name>exercise1.1</name>
     <description>exercise1.1</description>
 

@@ -1,8 +1,10 @@
 server:
   port: 8080
+
 spring:
   application:
     name: exercise1.1
+
   ai:
     google:
       genai:
@@ -10,6 +12,7 @@ spring:
         chat:
           options:
             model: gemini-3.8-flash
+
 logging:
   level:
     org.springframework.ai.chat.client.advisor: DEBUG

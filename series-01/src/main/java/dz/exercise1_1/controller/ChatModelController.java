@@ -18,7 +18,7 @@ class ChatModelController {
 
     private final ChatModel chatModel;   // bean googleGenAiChatModel, injecté par son interface
 
-    ChatModelController(ChatModel chatModel) {
+    public ChatModelController(ChatModel chatModel) {
         this.chatModel = chatModel;
     }
 

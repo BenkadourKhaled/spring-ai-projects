@@ -26,6 +26,9 @@ public class ChatController {
         System.out.println("Entrée  : " + usage.getPromptTokens());
         System.out.println("Sortie  : " + usage.getCompletionTokens());
         System.out.println("Total   : " + usage.getTotalTokens());
-        return null;
+        return chatClient.prompt()
+                .user(message)
+                .call()
+                .content();
     }
 }

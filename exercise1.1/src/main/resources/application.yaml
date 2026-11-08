@@ -10,3 +10,11 @@ spring:
     google:
       genai:
         api-key: ${GEMINI_API_KEY}
+        chat:
+          options:
+            model: gemini-3.8-flash
+
+
+logging:
+  level:
+    org.springframework.ai.chat.client.advisor: DEBUG

@@ -1,0 +1,12 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: exercise1.1
+
+
+  ai:
+    google:
+      genai:
+        api-key: ${GEMINI_API_KEY}

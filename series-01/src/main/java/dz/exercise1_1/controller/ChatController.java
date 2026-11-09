@@ -17,15 +17,7 @@ public class ChatController {
 
     @GetMapping("/api/chat")
     public String chat(@RequestParam(name = "message") String message) {
-        ChatResponse response = chatClient.prompt()
-                .user("Qu'est-ce que Spring AI ?")
-                .call()
-                .chatResponse();
 
-        Usage usage = response.getMetadata().getUsage();
-        System.out.println("Entrée  : " + usage.getPromptTokens());
-        System.out.println("Sortie  : " + usage.getCompletionTokens());
-        System.out.println("Total   : " + usage.getTotalTokens());
         return chatClient.prompt()
                 .user(message)
                 .call()

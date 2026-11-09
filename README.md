@@ -1,74 +1,47 @@
-# Spring AI Fast Track : journal d'exercices
+# Spring AI Fast Track — Journal d'exercices
 
-Exercices du cours « Spring AI Fast Track », réalisés série par série.
+Journal des exercices réalisés dans le cadre du cours **Spring AI Fast Track**.
 
-**Stack technique :** Java 27, Spring Boot 4.1, Spring AI 2.0.1, Maven,
-Docker Model Runner et Gemini.
+**Stack technique utilisée**
+- Java 27
+- Spring Boot 4.1
+- Spring AI 2.0.1
+- Maven
+- Docker Model Runner
+- Ollama
+- Gemini
 
-## Avancement
+> Ce README documente uniquement les exercices réalisés et les informations effectivement vérifiées. Les exercices non encore réalisés, les pistes de test et les mesures non collectées ne sont pas présentés comme des travaux terminés.
 
-  Série   Thème                                      Statut
-  ------- ------------------------------------------ ------------------------------
-  01      Say Hello to AI in Spring Boot             Exercices 1.1 à 1.8 terminés
-  02      Prompts, Advisors et sorties structurées   À faire
-  03      Fondations de l'IA générative              À faire
-  04      Chat Memory                                À faire
-  05      RAG                                        À faire
-  06      Tool Calling                               À faire
+---
 
-## Prérequis
-
--   JDK installé et Maven (wrapper `mvnw` fourni).
--   Docker Desktop avec Docker Model Runner activé.
--   Un modèle local téléchargé et disponible dans Docker Model Runner.
--   Une clé API Gemini uniquement pour les tests avec Gemini.
--   Les secrets doivent être fournis par variables d'environnement,
-    jamais enregistrés en clair dans le dépôt.
-
-------------------------------------------------------------------------
-
-## Série 01 : Say Hello to AI in Spring Boot
+## Série 01 — Say Hello to AI in Spring Boot
 
 **Dossier :** `series-01/`
 
-### Exercices réalisés
+### Exercices réalisés et documentés
 
-  -----------------------------------------------------------------------
-  Exercice                            Résumé
-  ----------------------------------- -----------------------------------
-  1.1                                 Projet généré avec Spring
-                                      Initializr
+| Exercice | Réalisation |
+|---|---|
+| 1.1 | Projet généré avec Spring Initializr. |
+| 1.3 | Création de l'endpoint `GET /api/chat?message=...` avec `ChatClient`. |
+| 1.4 | Affichage des beans Spring AI au démarrage avec `BeanLister` et activation des logs `debug=true`. |
+| 1.5 | Estimation du coût de 10 000 requêtes courtes et longues. |
+| 1.6 | Comparaison de l'utilisation de `ChatModel` + `Prompt` avec `ChatClient`. |
+| 1.7 | Utilisation d'Ollama comme fournisseur local sans modifier le contrôleur. |
+| 1.8 | Intégration de Docker Model Runner avec le starter OpenAI, configuration du `base-url` et utilisation d'une clé factice. |
 
-  1.3                                 Endpoint
-                                      `GET /api/chat?message=...` avec
-                                      `ChatClient`
+*Remarque : l'exercice 1.2 n'est pas documenté dans cette version, faute d'informations suffisantes. Il n'est donc pas marqué comme réalisé.*
 
-  1.4                                 Beans Spring AI listés au démarrage
-                                      (`BeanLister`), logs `debug=true`
+---
 
-  1.5                                 Estimation du coût de 10 000
-                                      requêtes (courtes et longues)
+### Exercice 1.7 — Passer en local avec Ollama
 
-  1.6                                 Comparaison `ChatModel` + `Prompt`
-                                      contre `ChatClient`
+**Objectif :** utiliser un modèle d'IA local avec Spring AI sans modifier le contrôleur.
 
-  1.7                                 Passage du fournisseur cloud à
-                                      Ollama, sans changer le contrôleur
+#### Configuration utilisée
 
-  1.8                                 Intégration de Docker Model Runner
-                                      avec le starter OpenAI,
-                                      configuration du `base-url` et
-                                      utilisation d'une clé factice
-  -----------------------------------------------------------------------
-
-### Exercice 1.7 --- Passer en local avec Ollama
-
-**Objectif :** utiliser un modèle d'IA local avec Spring AI sans
-modifier le contrôleur.
-
-Configuration utilisée :
-
-``` yaml
+```yaml
 spring:
   ai:
     model:
@@ -79,28 +52,32 @@ spring:
           model: llama3.2:1b
 ```
 
-Lancement :
+#### Lancement
 
-``` bash
+```bash
 ollama pull llama3.2:1b
 ./mvnw spring-boot:run
 ```
 
-Test :
+#### Test
 
-``` text
+```text
 http://localhost:8080/api/chat?message=Bonjour
 ```
 
-### Exercice 1.8 ★★ --- Docker Model Runner
+#### Erreurs rencontrées
 
-**Objectif :** lancer un modèle avec Docker Model Runner et utiliser le
-starter OpenAI de Spring AI pour communiquer avec ce modèle via une API
-compatible OpenAI.
+Aucune erreur précise liée à cet exercice n'a été consignée dans les informations disponibles. Aucune erreur n'est ajoutée artificiellement.
+
+---
+
+### Exercice 1.8 — Docker Model Runner
+
+**Objectif :** lancer un modèle local avec Docker Model Runner et utiliser le starter OpenAI de Spring AI pour communiquer avec lui via une API compatible OpenAI.
 
 #### Architecture utilisée
 
-``` text
+```text
 Client HTTP
     |
     v
@@ -119,15 +96,13 @@ Docker Model Runner
 Modèle local : smollm2
 ```
 
-Docker Model Runner exécute le modèle localement et expose une API
-compatible avec le format OpenAI. Spring AI peut donc utiliser le
-starter OpenAI en redirigeant son client vers cette API locale.
+Docker Model Runner exécute le modèle localement et expose une API compatible avec le format OpenAI. Spring AI peut donc utiliser le starter OpenAI en redirigeant son client vers cette API locale.
 
-#### Configuration
+#### Configuration utilisée
 
-Configuration utilisée dans `application.yml` :
+Dans `application.yml` :
 
-``` yaml
+```yaml
 spring:
   ai:
     openai:
@@ -138,171 +113,76 @@ spring:
           model: ai/smollm2
 ```
 
-Le nom du modèle doit correspondre exactement à l'identifiant exposé par
-Docker Model Runner dans l'environnement utilisé.
+Le nom du modèle doit correspondre exactement à l'identifiant disponible dans Docker Model Runner.
 
-La valeur `dummy-key` est une clé factice de configuration. Elle ne
-constitue pas une véritable clé OpenAI.
+#### Erreur rencontrée : HTTP 404
 
-#### Correction de l'erreur HTTP 404
+**Symptôme :** le premier appel effectué depuis Spring AI retournait une erreur HTTP 404.
 
-**Problème rencontré :** le premier appel depuis Spring AI retournait
-une erreur HTTP 404.
-
-**Cause identifiée :** Spring AI 2.0.1 utilise le client officiel
-OpenAI. Celui-ci construit les endpoints à partir du `base-url`
-configuré. Docker Model Runner expose ici son API compatible OpenAI sous
-le chemin `/engines/v1`. Un `base-url` incomplet ou incorrect conduit
-donc le client à appeler une URL qui ne correspond pas à l'endpoint
-attendu.
+**Cause identifiée :** le client OpenAI construit les endpoints à partir du `base-url` configuré. Dans l'environnement utilisé, l'API compatible OpenAI de Docker Model Runner était exposée sous le chemin `/engines/v1`. Un `base-url` ne contenant pas le bon chemin conduisait donc à une URL incorrecte.
 
 **Correction appliquée :**
 
-``` yaml
+```yaml
 base-url: http://localhost:12434/engines/v1
 ```
 
-Cette configuration indique au client OpenAI d'utiliser le point
-d'entrée API de Docker Model Runner.
+**Méthode de diagnostic :**
+1. Vérifier que Docker Model Runner est démarré.
+2. Vérifier que le modèle attendu est disponible.
+3. Tester l'endpoint de l'API locale avec `curl`.
+4. Reporter le bon chemin dans `base-url`.
+5. Relancer l'application Spring Boot et refaire l'appel.
 
-**Méthode de diagnostic retenue :** tester d'abord l'endpoint avec
-`curl`, puis effectuer le test depuis Spring Boot. Cela permet de
-distinguer un problème d'accessibilité ou de configuration du serveur
-local d'un problème dans l'intégration Spring AI.
+Cette démarche permet de distinguer un problème d'accès à l'API locale d'un problème de configuration dans l'application Spring.
 
-#### Pourquoi une clé API est-elle demandée si le modèle est local ?
+#### Pourquoi une clé API est-elle demandée avec un modèle local ?
 
-Le starter OpenAI de Spring AI s'appuie sur le client officiel OpenAI.
-Ce client attend une valeur pour le paramètre `api-key`, même lorsque
-son URL de base est redirigée vers un serveur compatible OpenAI hébergé
-localement.
+Le starter OpenAI de Spring AI utilise un client compatible avec l'API OpenAI. Ce client attend une valeur pour le paramètre `api-key`, même lorsque son URL de base est redirigée vers un serveur local compatible.
 
-Dans cet exercice, la clé factice satisfait cette exigence de
-configuration du client. Le modèle, lui, est exécuté par Docker Model
-Runner sur la machine locale : il ne s'agit pas d'une requête envoyée
-aux serveurs OpenAI.
+Dans cet exercice, `dummy-key` est une valeur factice destinée à satisfaire la configuration du client. Ce n'est pas une véritable clé OpenAI.
 
-Il faut donc distinguer :
+Il faut distinguer trois éléments :
 
--   **La configuration du client :** le client OpenAI attend une valeur
-    pour son paramètre de clé API.
--   **L'exécution du modèle :** Docker Model Runner effectue l'inférence
-    localement.
--   **L'authentification du serveur :** une clé factice ne remplace pas
-    une authentification réelle si le serveur local en exige une.
+- **Configuration du client :** le client attend une valeur pour son paramètre `api-key`.
+- **Exécution du modèle :** Docker Model Runner exécute le modèle sur la machine locale.
+- **Authentification du serveur :** une clé factice ne remplace pas une authentification réelle si le serveur local en exige une.
 
-#### Comparaison : Gemini et le modèle local `smollm2`
+#### Comparaison effectuée : Gemini et `smollm2`
 
-J'ai posé la même question à Gemini et au modèle local `smollm2` afin de
-comparer leur comportement.
+La même question a été posée à Gemini et au modèle local `smollm2`.
 
-**Observation personnelle :** lors de mes tests, Gemini a pris un peu
-plus de temps pour répondre que le modèle léger installé localement avec
-Docker Model Runner. Le modèle local a donc été plus rapide dans mon
-environnement de test.
+**Observation pendant les tests :** Gemini a pris un peu plus de temps pour répondre que le modèle léger exécuté localement avec Docker Model Runner. Dans cet environnement de test, `smollm2` a donc répondu plus rapidement.
 
-Cette observation concerne la latence constatée pendant mes essais. Elle
-ne signifie pas que le modèle local fournit nécessairement de meilleures
-réponses. La qualité doit être évaluée séparément, avec les mêmes
-questions et des critères identiques.
+Cette observation porte uniquement sur la vitesse constatée pendant ces essais. Elle ne permet pas de conclure que le modèle local fournit de meilleures réponses. La qualité doit être évaluée séparément avec les mêmes questions et des critères identiques.
 
-  -----------------------------------------------------------------------
-  Critère                 Gemini                  Docker Model Runner
-                                                  (`smollm2`)
-  ----------------------- ----------------------- -----------------------
-  Hébergement             Cloud                   Local
+| Critère | Gemini | Docker Model Runner (`smollm2`) |
+|---|---|---|
+| Hébergement | Cloud | Local |
+| Connexion Internet | Nécessaire pour accéder à l'API | Pas nécessaire pour l'inférence locale |
+| Temps de réponse observé | Un peu plus long pendant mes tests | Plus rapide pendant mes tests |
+| Ressources d'exécution | Infrastructure du fournisseur | Ressources de la machine locale |
+| Qualité des réponses | Non évaluée de manière chiffrée | Non évaluée de manière chiffrée |
 
-  Connexion Internet      Nécessaire pour l'API   Pas nécessaire pour
-                                                  l'inférence locale
+---
 
-  Temps de réponse        Un peu plus long lors   Plus rapide lors de mes
-  observé                 de mes tests            tests
+## Bilan des erreurs réellement documentées
 
-  Ressources d'exécution  Infrastructure du       Ressources de la
-                          fournisseur             machine locale
+| Exercice | Erreur | Cause | Correction |
+|---|---|---|---|
+| 1.8 | HTTP 404 lors de l'appel à Docker Model Runner | Chemin incorrect ou incomplet dans le `base-url` | Utiliser `http://localhost:12434/engines/v1` dans la configuration testée. |
 
-  Qualité des réponses    À évaluer avec les      À évaluer avec les
-                          mêmes questions         mêmes questions
-  -----------------------------------------------------------------------
+Les autres exercices ne comportent pas d'erreur précise consignée dans les informations disponibles. Pour éviter d'inventer des incidents, seules les erreurs réellement signalées sont inscrites ici.
 
-Les durées exactes et les évaluations de qualité restent à renseigner
-dans `mesures.md` : elles ne sont pas chiffrées ici.
+---
 
-#### Piste d'amélioration
+## Principaux acquis
 
-Pour tester un modèle local différent, je peux ensuite essayer
-`ai/gemma3:4B-Q4_K_M`, en ne modifiant que la propriété `model`, après
-avoir vérifié que ce modèle est bien disponible dans Docker Model
-Runner.
-
-L'objectif est de comparer les modèles dans les mêmes conditions, sans
-modifier le contrôleur ni l'architecture de l'application.
-
-### Ce que j'ai appris
-
--   Docker Model Runner permet d'exécuter des modèles d'IA localement.
--   Spring AI peut utiliser le starter OpenAI pour communiquer avec un
-    serveur tiers compatible avec l'API OpenAI.
--   Le `base-url` permet de rediriger le client vers le serveur
-    compatible choisi.
--   Le client OpenAI peut exiger une valeur `api-key` même lorsque le
-    serveur cible est local.
--   Une clé factice ne sert qu'à satisfaire la configuration du client
-    lorsque le serveur local n'exige pas d'authentification.
--   Une erreur HTTP 404 peut provenir d'un chemin API incorrect dans le
-    `base-url`.
--   Tester d'abord l'API avec `curl` facilite le diagnostic avant de
-    tester l'intégration Spring Boot.
--   Un modèle local léger peut répondre plus rapidement qu'un modèle
-    cloud dans un environnement donné.
--   La vitesse et la qualité des réponses sont deux critères distincts
-    qui doivent être mesurés séparément.
-
-### Erreurs rencontrées
-
-  -------------------------------------------------------------------------------------
-  Erreur                  Cause                   Correctif
-  ----------------------- ----------------------- -------------------------------------
-  `Non-parseable POM`     Commande `ollama pull`  Supprimer la ligne et exécuter la
-                          collée dans le          commande dans le terminal
-                          `pom.xml`               
-
-  HTTP 404 avec Docker    `base-url` incorrect ou Utiliser
-  Model Runner            chemin API incomplet    `http://localhost:12434/engines/v1`
-
-  Configuration de la clé Le client OpenAI attend Fournir une clé factice si le serveur
-  API                     une valeur `api-key`    local n'exige pas d'authentification
-  -------------------------------------------------------------------------------------
-
-------------------------------------------------------------------------
-
-## Prochaines étapes
-
--   [ ] Compléter les mesures de comparaison Gemini / `smollm2` dans
-    `mesures.md`.
--   [ ] Tester `ai/gemma3:4B-Q4_K_M` avec Docker Model Runner.
--   [ ] Commencer l'exercice 1.9 --- Bedrock : préparer AWS.
--   [ ] Continuer les exercices de la série 01 avant de passer à la
-    série 02.
-
-------------------------------------------------------------------------
-
-## Modèle à copier pour les prochaines séries
-
-## Série 0X : Nom de la série
-
-**Dossier :** `series-0X/`
-
-  Exercice   Résumé
-  ---------- -------------
-  X.1        À compléter
-
-### Ce que j'ai appris
-
-À compléter.
-
-### Erreurs rencontrées
-
-  Erreur        Cause         Correctif
-  ------------- ------------- -------------
-  À compléter   À compléter   À compléter
+- Utiliser `ChatClient` pour appeler un modèle depuis une application Spring Boot.
+- Comprendre la différence entre `ChatModel` + `Prompt` et `ChatClient`.
+- Connecter Spring AI à un modèle local avec Ollama.
+- Connecter Spring AI à Docker Model Runner via le starter OpenAI.
+- Configurer un `base-url` pour cibler une API compatible OpenAI.
+- Comprendre pourquoi le client peut demander une valeur `api-key`, même avec un modèle local.
+- Diagnostiquer une erreur HTTP 404 liée à un endpoint API incorrect.
+- Distinguer la vitesse de réponse de la qualité des réponses.

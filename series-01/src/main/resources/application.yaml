@@ -4,22 +4,25 @@ server:
 spring:
   application:
     name: exercise1.1
+
   ai:
     chat:
       client:
         enabled: false
+
     google:
       genai:
         api-key: ${GEMINI_API_KEY}
         chat:
           options:
             model: gemini-3.8-flash
+
     openai:
       api-key: test
       base-url: http://localhost:12434/engines/v1
       chat:
         options:
-          model: ai/smollm2 
+          model: ai/smollm2
 
 
 logging:

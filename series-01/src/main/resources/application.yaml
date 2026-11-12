@@ -5,26 +5,28 @@ spring:
   application:
     name: exercise1.1
 
-  #ai:
-  #  google:
-  #    genai:
-  #      api-key: ${GEMINI_API_KEY}
-  #      chat:
-  #        options:
-  #          model: gemini-3.8-flash
   ai:
-    model:
-      chat: ollama                  # choisit le fournisseur de chat
-    ollama:
-      base-url: http://localhost:11434   # valeur par défaut, peut être omise
+    chat:
+      client:
+        enabled: false
+
+    google:
+      genai:
+        api-key: ${GEMINI_API_KEY}
+        chat:
+          options:
+            model: gemini-3.8-flash
+
+    openai:
+      api-key: test
+      base-url: http://localhost:12434/engines/v1
       chat:
         options:
-          model: llama3.2:1b        # doit correspondre à `ollama list`
-          temperature: 0.7
-
+          model: ai/smollm2
 
 
 logging:
   level:
+    org.springframework.ai.chat.client.advisor: DEBUG
     org.springframework.ai: DEBUG
     org.springframework.boot.autoconfigure: DEBUG   # détail des conditions d'auto-configuration

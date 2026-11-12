@@ -1,4 +1,4 @@
-package dz.exercise1_1.controller;
+/*package dz.exercise1_1.controller;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.SystemMessage;
@@ -34,3 +34,5 @@ class ChatModelController {
         return response.getResult().getOutput().getText();
     }
 }
+
+ */

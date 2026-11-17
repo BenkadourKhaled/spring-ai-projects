@@ -468,4 +468,4 @@ Les autres exercices ne comportent pas d'erreur précise consignée dans les inf
 - Isoler une expérience dans une branche Git dédiée.
 - Distinguer la vitesse de réponse de la qualité des réponses.
 - Distinguer les quatre rôles de messages (System, User, Assistant, Tool) et leurs classes Spring AI.
-- Ne jamais placer du texte utilisateur dans un message System : risque d'injection de prompt.
+- Ne jamais placer du texte utilisateur git commit -m "docs: add exercise 2.1 (message roles) to the journal"dans un message System : risque d'injection de prompt.

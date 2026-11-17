@@ -371,6 +371,62 @@ Parameter 0 of constructor in ...ChatController required a bean of type
 
 ---
 
+## Série 02 — Prompts, Advisors et réponses structurées
+
+**Objectif de la série :** maîtriser les rôles de messages, les defaults, les templates, le prompt stuffing, les advisors, les `ChatOptions` et les sorties structurées.
+
+### Exercices réalisés et documentés
+
+| Exercice | Réalisation |
+|---|---|
+| 2.1 | Analyse des quatre rôles de messages (sans code) et des conséquences d'une inversion System / User (voir la section 2.1). |
+
+---
+
+### Exercice 2.1 — Les quatre rôles
+
+**Objectif :** identifier le rôle de chaque message d'un échange avec un LLM, et expliquer ce qui change si l'on inverse System et User. Exercice sans code.
+
+**Énoncé :** pour la phrase « Tu es un assistant RH, réponds en français » et la question « Combien de jours de congé ai-je ? », indiquer le rôle de chaque message (User, System, Assistant, Tool).
+
+#### Rôle de chaque élément
+
+| Élément | Rôle | Qui « parle » ? | Classe Spring AI |
+|---|---|---|---|
+| « Tu es un assistant RH, réponds en français » | System | Le développeur | `SystemMessage` |
+| « Combien de jours de congé ai-je ? » | User | L'utilisateur final | `UserMessage` |
+| Réponse du modèle | Assistant | Le LLM | `AssistantMessage` |
+| Résultat d'une fonction appelée par le modèle | Tool | Une fonction de l'application | `ToolResponseMessage` |
+
+Le message System et le message User sont les deux seuls messages envoyés ici. Le rôle Assistant est la réponse du modèle : il n'est pas écrit par le développeur, mais il réapparaît dans l'historique d'une conversation (série 04). Le rôle Tool n'intervient que si le modèle appelle une fonction (série 06).
+
+```text
+[SYSTEM]    Tu es un assistant RH, réponds en français
+[USER]      Combien de jours de congé ai-je ?
+   |
+   v
+[ASSISTANT] (réponse générée par le LLM)
+```
+
+#### Si l'on inverse System et User
+
+Le cours ne traite pas ce cas : les points suivants sont un raisonnement général, et le comportement exact varie selon le modèle.
+
+- **Inversion des contenus :** la question devient une consigne de fond et la consigne devient une demande de l'utilisateur. Le modèle risque de répondre « je suis un assistant RH » sans répondre à la question sur les congés.
+- **Inversion de l'ordre seul :** la convention est de placer le System en premier. Selon le fournisseur, un autre ordre est refusé ou traité différemment.
+- **Risque de sécurité :** du texte venant de l'utilisateur placé dans un message System lui donnerait l'autorité du développeur (risque d'injection de prompt). À l'inverse, des règles du développeur placées dans un message User sont plus faciles à contourner. Règle retenue : tout ce qui vient de l'utilisateur va dans le message User, jamais dans le message System.
+- **Limite indépendante des rôles :** même bien placé, le modèle ne connaît pas la politique de congés de l'entreprise. Il donne une réponse générique, tant que le prompt stuffing ou le RAG n'apportent pas ces règles.
+
+#### Cas de Gemini
+
+D'après le cours, Gemini ne distingue que User et Assistant (appelé Model) : Spring AI fusionne alors le message System dans le message User, sans changer le code. La frontière entre consigne et question est alors moins nette. Ce comportement est repris du cours : il n'a pas été vérifié dans cette version de Spring AI (2.0.1) avec `GoogleGenAiChatModel`.
+
+#### Expérience et erreurs
+
+Une expérience avec un objet `Prompt` (messages dans l'ordre normal, puis inversé) a été proposée pour comparer le modèle local de Docker et Gemini. Ses résultats n'ont pas été consignés : aucune réponse de modèle n'est donc présentée ici. L'exercice étant sans code, aucune erreur n'a été rencontrée.
+
+---
+
 ## Problèmes d'environnement rencontrés
 
 | Contexte | Message ou symptôme | Cause identifiée | Action |
@@ -411,3 +467,5 @@ Les autres exercices ne comportent pas d'erreur précise consignée dans les inf
 - Structurer un projet Maven parent avec des modules, et lire les erreurs de modules manquants.
 - Isoler une expérience dans une branche Git dédiée.
 - Distinguer la vitesse de réponse de la qualité des réponses.
+- Distinguer les quatre rôles de messages (System, User, Assistant, Tool) et leurs classes Spring AI.
+- Ne jamais placer du texte utilisateur dans un message System : risque d'injection de prompt.

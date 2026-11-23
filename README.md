@@ -26,8 +26,11 @@ spring-ai-projects/        <- projet parent (packaging pom), versions communes
 ├── pom.xml                <- spring-boot-starter-parent + spring-ai-bom + <modules>
 ├── .gitignore
 ├── README.md
-└── series-01/             <- module de la série 01
-    ├── pom.xml            <- <parent> pointe vers spring-ai-projects
+├── series-01/             <- module de la série 01
+│   ├── pom.xml            <- <parent> pointe vers spring-ai-projects
+│   └── src/
+└── series-02/             <- module de la série 02 (prompts, advisors, réponses structurées)
+    ├── pom.xml
     └── src/
 ```
 
@@ -380,6 +383,8 @@ Parameter 0 of constructor in ...ChatController required a bean of type
 | Exercice | Réalisation |
 |---|---|
 | 2.1 | Analyse des quatre rôles de messages (sans code) et des conséquences d'une inversion System / User (voir la section 2.1). |
+| 2.2 | Envoi d'un message System et d'un message User avec l'API fluide, avec et sans message System (voir la section 2.2, résultats des tests non consignés). |
+| 2.3 | Même appel écrit de trois façons : API fluide, objet `Prompt`, liste de messages (voir la section 2.3, résultats des tests non consignés). |
 
 ---
 
@@ -427,6 +432,82 @@ Une expérience avec un objet `Prompt` (messages dans l'ordre normal, puis inver
 
 ---
 
+### Exercice 2.2 — Message System et message User
+
+**Objectif :** envoyer un message System (« Tu es un assistant RH interne ») et un message User avec l'API fluide, puis comparer la réponse à la même question avec et sans message System.
+
+**Mise en place :** nouveau module `series-02` (starter Google GenAI, clé lue dans la variable d'environnement `GEMINI_API_KEY`), sur la branche `exercise/2-2-system-and-user`.
+
+```java
+// Avec message System
+chatClient.prompt()
+        .system("Tu es un assistant RH interne")
+        .user(message)
+        .call()
+        .content();
+
+// Sans message System
+chatClient.prompt()
+        .user(message)
+        .call()
+        .content();
+```
+
+Deux endpoints exposent ces appels : `GET /api/rh/avec-system?message=...` et `GET /api/rh/sans-system?message=...`. Le message System est une constante côté serveur et non un paramètre de l'URL, conformément à la règle retenue à l'exercice 2.1. Un `SimpleLoggerAdvisor` permet de lire dans la console les messages envoyés.
+
+**Point de conception :** le message System demandé par l'énoncé donne un rôle sans aucune restriction. La différence entre les deux réponses n'est donc pas garantie pour chaque question. Une version avec une restriction explicite (répondre uniquement aux questions RH) rend l'effet plus net. Ce point est un raisonnement de conception, il n'a pas été mesuré.
+
+**Résultats :** les réponses obtenues avec et sans message System n'ont pas été consignées : aucune réponse de modèle n'est présentée ici. Aucune erreur précise n'a été consignée pour cet exercice.
+
+---
+
+### Exercice 2.3 — Trois façons d'envoyer des messages
+
+**Objectif :** écrire le même appel de trois façons (API fluide, objet `Prompt`, liste de messages) et déterminer laquelle convient à un historique de conversation.
+
+**Mise en place :** module `series-02`, branche `exercise/2-3-three-ways-to-send-messages`, avec un contrôleur exposant `GET /api/messages/fluide`, `/prompt`, `/liste` et `/historique`.
+
+```java
+// 1. API fluide
+chatClient.prompt().system(SYSTEM).user(message).call().content();
+
+// 2. Objet Prompt
+Prompt prompt = new Prompt(List.of(new SystemMessage(SYSTEM), new UserMessage(message)));
+chatClient.prompt(prompt).call().content();
+
+// 3. Liste de messages
+List<Message> messages = List.of(new SystemMessage(SYSTEM), new UserMessage(message));
+chatClient.prompt().messages(messages).call().content();
+```
+
+Le texte simple `prompt("...")` est un raccourci : il crée en coulisses un `UserMessage`.
+
+#### Quelle façon pour un historique de conversation ?
+
+| Façon | Ce qu'elle permet | Pour un historique |
+|---|---|---|
+| API fluide | Un message System et un message User | Insuffisante seule : pas de place pour les réponses précédentes |
+| `Prompt` | Une liste de messages, et des `ChatOptions` (d'après le cours) | Adaptée |
+| Liste de messages | N'importe quelle liste de `Message` | Adaptée, la plus directe |
+
+**Réponse retenue :** la liste de messages. Un historique est une suite de messages User et Assistant qui alternent, et le modèle doit tous les recevoir à chaque appel, car il ne retient rien d'un appel à l'autre. En pratique, la liste n'est pas construite à la main : `ChatMemory` avec un advisor de mémoire (série 04) l'ajoute automatiquement.
+
+**Vérification prévue :** comparer les logs du `SimpleLoggerAdvisor` des trois endpoints (messages identiques) plutôt que les textes des réponses, qui varient d'un appel à l'autre.
+
+#### Erreur rencontrée : `curl -G` dans PowerShell
+
+```text
+Invoke-WebRequest : Impossible de trouver un paramètre correspondant au nom « G ».
+```
+
+**Cause :** dans PowerShell, `curl` est un alias de `Invoke-WebRequest`, qui ne connaît pas l'option `-G` du programme curl. La requête n'est pas partie.
+
+**Correction :** utiliser `curl.exe` (le vrai curl), ou `Invoke-RestMethod` avec le message encodé (`[uri]::EscapeDataString(...)`), ou Git Bash où `curl -G ... --data-urlencode ...` fonctionne.
+
+**Résultats :** les réponses des endpoints et les logs n'ont pas été consignés : aucun résultat de test n'est présenté ici.
+
+---
+
 ## Problèmes d'environnement rencontrés
 
 | Contexte | Message ou symptôme | Cause identifiée | Action |
@@ -436,6 +517,7 @@ Une expérience avec un objet `Prompt` (messages dans l'ordre normal, puis inver
 | Git | `fatal: option '--cached' must come before non-option arguments` | Ordre des arguments de `git grep` | Écrire `git grep --cached -n "motif"` |
 | GitHub | `Failed to connect to github.com:443 ... Could not connect to server` | Blocage ou indisponibilité du réseau, pas un problème d'authentification | Tester la connexion (`curl -I https://github.com`), vérifier le proxy, réessayer sur un autre réseau |
 | Docker | Téléchargement de 7,3 Go lancé par `docker model run ai/gemma3` | Étiquette par défaut pointant vers une variante lourde | Interrompre, choisir un modèle léger dont la taille est vérifiée |
+| PowerShell | `Invoke-WebRequest : Impossible de trouver un paramètre correspondant au nom « G »` | `curl` est un alias de `Invoke-WebRequest` dans PowerShell, pas le programme curl | Utiliser `curl.exe`, `Invoke-RestMethod`, ou Git Bash |
 
 ---
 
@@ -447,6 +529,7 @@ Une expérience avec un objet `Prompt` (messages dans l'ordre normal, puis inver
 | 1.3 | HTTP 500, `Failed to generate content` (404 de Google en cause racine) | Modèle Gemini par défaut retiré pour les nouveaux utilisateurs | Définir le modèle explicitement dans la configuration |
 | 1.8 | HTTP 404 lors de l'appel à Docker Model Runner | Chemin incorrect ou incomplet dans le `base-url` (le client OpenAI officiel attend `/v1`) | Utiliser `http://localhost:12434/engines/v1` dans la configuration testée. |
 | 1.11 | `ChatClient$Builder` introuvable au démarrage | Ancien contrôleur dépendant du builder désactivé | Supprimer l'ancien contrôleur et nettoyer le code compilé (à confirmer) |
+| 2.3 | `curl -G` refusé : paramètre « G » introuvable (PowerShell) | `curl` est un alias de `Invoke-WebRequest` | Utiliser `curl.exe`, `Invoke-RestMethod` ou Git Bash |
 
 Les autres exercices ne comportent pas d'erreur précise consignée dans les informations disponibles. Pour éviter d'inventer des incidents, seules les erreurs réellement signalées sont inscrites ici.
 
@@ -469,3 +552,6 @@ Les autres exercices ne comportent pas d'erreur précise consignée dans les inf
 - Distinguer la vitesse de réponse de la qualité des réponses.
 - Distinguer les quatre rôles de messages (System, User, Assistant, Tool) et leurs classes Spring AI.
 - Ne jamais placer du texte utilisateur dans un message System : risque d'injection de prompt.
+- Envoyer un message System et un message User avec l'API fluide (`.system(...)`, `.user(...)`).
+- Écrire le même appel de trois façons (API fluide, `Prompt`, liste de messages) et savoir que seule une liste peut porter un historique de conversation.
+- Savoir que `curl` est un alias d'`Invoke-WebRequest` dans PowerShell (utiliser `curl.exe`).
